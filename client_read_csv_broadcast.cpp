@@ -30,10 +30,16 @@ int main()
 	cout<<"ready to broadcast on port "<<PORT<<endl;
 	string filename;
 	int tsp;
+	double time_multiplier;
 	cout<<"read CSV file:";
 	cin>>filename;
 	cout<<"transpose:";
 	cin>>tsp;
+	cout<<"time multiplier:";
+	cin>>time_multiplier;
+	string f;
+	cout<<"synth function:";
+	cin>>f;
 	ifstream fin(filename.c_str());
 	string s;
 	getline(fin,s);
@@ -45,9 +51,9 @@ int main()
 	while(fin>>note>>start>>end>>duration>>velocity)
 	{
 		//end is unused
-		while(start>high_precision_clock());
+		while(start>high_precision_clock()*time_multiplier);
 		cout<<transpose(note,tsp)<<" ";
-		ss<<transpose(note,tsp)<<" "<<int(duration*44100)<<" "<<velocity<<"\n";
+		ss<<transpose(note,tsp)<<" "<<int(duration*44100/time_multiplier)<<" "<<velocity<<" "<<f<<"\n";
 		getline(ss,s);
 		sendto(client,s.c_str(),s.length(),0,(SOCKADDR*)&addrSrv,sizeof(SOCKADDR));
 	}

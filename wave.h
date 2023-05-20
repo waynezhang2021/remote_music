@@ -52,12 +52,6 @@ void wave_play(wave_attribute wa)
 }
 void add_tone(wave_attribute wa,tone_attribute ta,double func(double))
 {
-	if(wa.channels==1)
-		if(ta.start+ta.length>=wa.size)
-			throw logic_error("tone longer than buffer");
-	if(wa.channels==2)
-		if(ta.start+ta.length*2>=wa.size)
-			throw logic_error("tone longer than buffer");
 	void* samples=wa.samples;
 	void* note_count=wa.note_count;
 	int bits=wa.bits;
@@ -65,7 +59,7 @@ void add_tone(wave_attribute wa,tone_attribute ta,double func(double))
 	int channels=wa.channels;
 	int sample_max=pow(2,wa.bits)-1;
 	int start=ta.start;
-	int end=ta.start+ta.length;
+	int end=min(ta.start+ta.length,wa.size);
 	int coeff=sample_max*ta.volume/(ta.func_max-ta.func_min);
 	int add=-ta.func_min;
 	double c=3.1415926535897932384626433832795/sample_rate*ta.freq;
@@ -102,7 +96,7 @@ void add_tone(wave_attribute wa,tone_attribute ta,double func(double))
 			}
 	}
 }
-double note_to_hz(string note)
+double note_to_hz(string note,int transpose)
 {
 	static int tbl[]= {0,2,4,5,7,9,11};
 	double base=261.6255653005986346778499935234;
@@ -114,12 +108,12 @@ double note_to_hz(string note)
 	if(note[1]=='#')
 	{
 		base*=ratio;
-		base*=pow(2,atoi(note.substr(2).c_str()));
+		base*=pow(2,atoi(note.substr(2).c_str())+transpose);
 		return base;
 	}
 	else
 	{
-		base*=pow(2,atoi(note.substr(1).c_str()));
+		base*=pow(2,atoi(note.substr(1).c_str())+transpose);
 		return base;
 	}
 }
